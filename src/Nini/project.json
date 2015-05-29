@@ -1,0 +1,31 @@
+﻿{
+  "version": "1.0.0-beta-*",
+  "description": "Tiny F# web framework",
+  "authors": [ "Alxandr" ],
+  "owners": [ "Alxandr" ],
+  "tags": [ "" ],
+  "projectUrl": "https://github.com/YoloDev/Nini",
+
+  "dependencies": {
+    "YoloDev.Dnx.FSharp": { "type": "build", "version": "1.0.0-*" },
+    "Microsoft.AspNet.Http": "1.0.0-*",
+    "Microsoft.AspNet.Http.Extensions": "1.0.0-*",
+    "Microsoft.AspNet.Http.Abstractions": "1.0.0-*",
+    "Microsoft.Framework.Logging": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.Threading.Tasks": ""
+      }
+    }
+  },
+
+  "compiler": {
+    "name": "F#",
+    "compilerAssembly": "YoloDev.Dnx.FSharp",
+    "compilerType": "YoloDev.Dnx.FSharp.FSharpProjectCompiler"
+  }
+}
