@@ -244,9 +244,15 @@ let rec private parseDoc state =
 
     parseDoc { state with lexerState = lexerState; doc = doc; stack = stack }
 
+  | Lexer.Comment comment ->
+    let doc, stack = add (Comment comment) state.doc state.stack
+
+    parseDoc { state with lexerState = lexerState; doc = doc; stack = stack }
+
   | Lexer.EOF ->
     closeEnd state.doc state.messages state.stack
 
+  // TODO: Remove
   | _ -> raise (new System.NotImplementedException (sprintf "%A not implemented" token))
 
 let rec private reverse nodes =

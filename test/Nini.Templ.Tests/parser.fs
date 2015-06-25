@@ -68,6 +68,20 @@ let ``handles open-ended documents`` () =
   testSingleElement template { tag = "html"; attributes = Map.ofList [ "class", Some "no-js" ]; children = List.empty }
 
 [<Fact>]
+let ``handles comments`` () =
+  let template = trim """
+<!DOCTYPE html>
+<!-- comment -->
+"""
+  let doc, messages = parse template
+  let nodes = doc.nodes
+  Assert.Equal (2, List.length nodes)
+
+  //let comment = List.item 1 nodes
+  let [_; comment] = nodes
+  Assert.Equal (Comment " comment ", comment)
+
+[<Fact>]
 let ``parses simple document`` () =
   let template = trim """
 <!DOCTYPE html>

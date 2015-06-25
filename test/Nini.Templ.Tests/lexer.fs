@@ -25,7 +25,7 @@ let testTemplate template expected =
     match expected with
     | [] ->
       // No more expected, thus expect EOF
-      let token, state = Lexer.next state
+      let token, _ = Lexer.next state
       matchToken token Lexer.Token.EOF
     | h :: t ->
       let token, state = Lexer.next state
