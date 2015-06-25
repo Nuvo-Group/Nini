@@ -7,16 +7,17 @@ open Nini.Http.Applicatives
 open Nini.Http.Successful
 
 type Startup() =
-  let printPath (ctx: HttpContext) =
+  let printPath (ctx: HttpContext) = async {
     printfn "Path: %s" (Path.value ctx.request.path)
-    async.Return (Some ctx)
+    return Some ctx
+  }
 
   let index = path "/" >>= ok "This is the index :)"
   let foobar = path "/foo/bar" >>= ok "This is the foobar"
   let get = GET >>= choose [index; foobar]
   
   let handle = 
-    choose
+    printPath >>= choose
       [ get
         RequestErrors.notfound "Resource not found..." ]
 

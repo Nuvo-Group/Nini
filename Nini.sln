@@ -18,6 +18,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{7FF28E
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "HelloFSharp", "sample\HelloFSharp\HelloFSharp.fsproj", "{1B207D65-5FF8-46BD-BD87-11966F36A6B7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Nini.Templ", "src\Nini.Templ\Nini.Templ.fsproj", "{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{67129E33-BF2A-4183-A0E3-32627BDAB5B4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Nini.Templ.Tests", "test\Nini.Templ.Tests\Nini.Templ.Tests.fsproj", "{6410CAD8-52BA-46B1-A949-32A4A61C0C6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +38,14 @@ Global
 		{1B207D65-5FF8-46BD-BD87-11966F36A6B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B207D65-5FF8-46BD-BD87-11966F36A6B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B207D65-5FF8-46BD-BD87-11966F36A6B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6410CAD8-52BA-46B1-A949-32A4A61C0C6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6410CAD8-52BA-46B1-A949-32A4A61C0C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6410CAD8-52BA-46B1-A949-32A4A61C0C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6410CAD8-52BA-46B1-A949-32A4A61C0C6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,5 +53,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7D7DE080-E4E4-4BA3-851C-14B47D455A57} = {2A3B3190-823D-40D1-95B3-CCF19F4392BD}
 		{1B207D65-5FF8-46BD-BD87-11966F36A6B7} = {7FF28E3B-C33E-49C5-BC51-48EDFF4B9582}
+		{BCF0A447-5B4B-4FE5-ADDA-5F49D3B8F9FD} = {2A3B3190-823D-40D1-95B3-CCF19F4392BD}
+		{6410CAD8-52BA-46B1-A949-32A4A61C0C6E} = {67129E33-BF2A-4183-A0E3-32627BDAB5B4}
 	EndGlobalSection
 EndGlobal

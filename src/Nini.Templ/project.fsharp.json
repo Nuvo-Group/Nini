@@ -1,0 +1,7 @@
+{
+  "files": [
+    "entities.fs",
+    "lexer.fs",
+    "parser.fs"
+  ]
+}

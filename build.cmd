@@ -24,5 +24,6 @@ CALL packages\KoreBuild\build\dnvm upgrade -runtime CLR -arch x86
 CALL packages\KoreBuild\build\dnvm install default -runtime CoreCLR -arch x86
 
 :run
+SET KOREBUILD_BUILD_V2=1
 CALL packages\KoreBuild\build\dnvm use default -runtime CLR -arch x86
 packages\Sake\tools\Sake.exe -I packages\KoreBuild\build -f makefile.shade %*
