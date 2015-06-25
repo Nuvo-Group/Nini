@@ -70,7 +70,7 @@ type private State =
 | AfterStyle4   // E
 
 // End
-| EOF
+| End
 
 type private Special =
 | Script
@@ -78,7 +78,7 @@ type private Special =
 
 type Token =
 | Text of string
-| Whitespace
+| Whitespace of string
 | OpenTagName of string
 | CloseTagName of string
 | SelfClosingTag
@@ -115,7 +115,7 @@ let private whitespace c =
 
 let private makeText text =
   match System.String.IsNullOrWhiteSpace text with
-  | true -> Whitespace
+  | true -> Whitespace text
   | false -> Text text
 
 let private ifState (c: char) ifTrue next =
@@ -233,7 +233,7 @@ let rec next state =
     | State.AfterStyle4 -> afterStyle4 state c
 
     // EOF
-    | State.EOF -> EOF, state
+    | State.End -> EOF, state
 
 and private text state = function
   | '<' ->

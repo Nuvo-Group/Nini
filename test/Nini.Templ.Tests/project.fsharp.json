@@ -1,6 +1,7 @@
 {
   "files": [
     "common-test.fs",
-    "lexer.fs"
+    "lexer.fs",
+    "parser.fs"
   ]
 }
