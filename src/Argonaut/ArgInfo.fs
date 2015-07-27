@@ -110,6 +110,9 @@ let isRest = function
   | Rest _ -> true
   | _ -> false
 
+let isFlag = function
+  | Flag _ -> true
+  | _ -> false
 
 let named name = function
   | Flag f -> f.name = name
@@ -125,6 +128,10 @@ let getCommand name = function
   | Commands c ->
     c.commands |> List.tryFind (fun c -> c.name = name)
   | _ -> None
+
+let flagValue = function
+  | Flag f -> f.value
+  | _ -> failwith "Not a flag"
 
 let children command = command.children
 

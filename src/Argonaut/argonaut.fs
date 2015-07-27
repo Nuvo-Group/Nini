@@ -63,16 +63,21 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
 
   let isArg (s: string) = s.StartsWith ("--", true, conf.culture) && s.Length > 2
   let isShort (s: string) = s.StartsWith ("-", true, conf.culture) && s.Length > 1
-  let split (s: string) = System.Text.RegularExpressions.Regex.Split (s, String.Empty) |> List.ofArray
+  let split (s: string) = 
+    // TODO: There has to be a better way...
+    System.Text.RegularExpressions.Regex.Split (s, String.Empty) 
+    |> List.ofArray
+    |> List.filter (fun s -> not (String.IsNullOrEmpty s))
+
+  let (&>>) l r v = l v && r v
 
   let rec runSwitches switches acc =
     match switches with
     | [] -> Some acc
     | h :: t ->
-      match involved |> List.tryFind (ArgInfo.short h) with
+      match involved |> List.tryFind (ArgInfo.short h &>> ArgInfo.isFlag) with
       | Some info ->
-        // TODO: parse value
-        failwith "not implemented"
+        runSwitches t (ArgInfo.flagValue info :: acc)
       | None -> None
 
   let rec run' args acc restAcc =

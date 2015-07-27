@@ -33,6 +33,6 @@ type Arguments =
 type Program () =
   member x.Main (args: string array) =
     let app = OptionsParser.create<Arguments>
-    [| "echo"; "-v"; "test.templ" |] |> OptionsParser.run app
+    [| "echo"; "-vvv"; "test.templ" |] |> OptionsParser.run app
     printfn "Templar running: %+A" app
     0
