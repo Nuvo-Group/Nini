@@ -55,6 +55,7 @@
     <None Include="project.lock.json" />
     <Compile Include="common-test.fs" />
     <Compile Include="lexer.fs" />
+    <Compile Include="parser.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

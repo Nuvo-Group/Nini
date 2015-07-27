@@ -2,6 +2,7 @@
   "files": [
     "entities.fs",
     "lexer.fs",
-    "parser.fs"
+    "parser.fs",
+    "program.fs"
   ]
 }

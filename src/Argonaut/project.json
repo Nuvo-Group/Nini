@@ -11,7 +11,7 @@
       "type": "build",
       "version": "1.0.0-*"
     },
-    "Argonaut": ""
+    "FSharp.Core": "4.0.0.1"
   },
 
   "frameworks": {

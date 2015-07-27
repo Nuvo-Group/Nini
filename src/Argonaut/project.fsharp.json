@@ -1,0 +1,9 @@
+{
+  "files": [
+    "utils.fs",
+    "types.fs",
+    "arginfo.fs",
+    "parsers.fs",
+    "argonaut.fs"
+  ]
+}
