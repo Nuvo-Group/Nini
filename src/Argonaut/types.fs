@@ -41,4 +41,4 @@ type ShorthandAttribute (name : string) =
   member private x.Name = name
   static member internal name (x: ShorthandAttribute) = x.Name
 
-type ArgParser = CultureInfo -> string list -> obj option * string list
+type ArgParser = CultureInfo -> string list -> (obj * string list) option

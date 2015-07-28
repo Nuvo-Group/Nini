@@ -4,7 +4,7 @@ open System
 open System.Globalization
 
 let private mkParser<'T> (parse: string * CultureInfo -> 'T): Type * ArgParser =
-  typeof<'T>, (fun c args -> match args with | arg :: t -> Some (parse (arg, c) :> obj), t | [] -> None, [])
+  typeof<'T>, (fun c args -> match args with | arg :: t -> Some (parse (arg, c) :> obj, t) | [] -> None)
 
 let private standard = 
   dict [

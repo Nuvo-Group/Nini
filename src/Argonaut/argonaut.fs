@@ -12,6 +12,41 @@ type OptionsConfig<'Template when 'Template :> IArgumentTemplate> = private {
   argInfo: ArgInfo.T list
   allowUnknown: bool }
 
+module internal Internal =
+  let makeResult t arguments commands =
+    debug ()
+    let grouped =
+      arguments
+      |> List.groupBy (fun i -> (i.GetType ()).BaseType)
+      |> dict
+
+    let bundled =
+      commands
+      |> List.zmap ArgInfo.commandType
+      |> List.map (fun ((a, c), t) -> 
+        match grouped.TryGetValue t with
+        | true, g -> g, c, a
+        | _ -> [], c, a)
+      |> List.fold (fun inner (values, command, argument) ->
+        let values =
+          match inner with | Some v -> v :: values | None -> values
+        let arg = ArgInfo.commandValue values command argument
+        Some arg) None
+
+    let outer =
+      match grouped.TryGetValue t with
+      | true, values -> values
+      | false, _ -> []
+
+    let result =
+      match bundled with
+      | Some command -> command :: outer
+      | None -> outer
+
+    List.dynamicCast t result
+
+open Internal
+
 let create<'Template when 'Template :> IArgumentTemplate> =
   //debug ()
   let t = typeof<'Template>
@@ -44,7 +79,8 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
       match ArgInfo.getCommand first command with
       | Some command ->
         // We have a command match
-        resolveCommands rest (command :: commands) (current @ involved) (ArgInfo.children command)
+        let (_, cmd) = command
+        resolveCommands rest (command :: commands) (current @ involved) (ArgInfo.children cmd)
       | None ->
         // We did not match a command
         commands, (current @ involved), args
@@ -52,7 +88,6 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
       // Here as well, no command match
       commands, (current @ involved), args
 
-  debug ()
   let commands, involved, args = resolveCommands args [] [] conf.argInfo
   let involved = involved |> List.filter (ArgInfo.isCommand >> not)
   let restArg = List.tryFind ArgInfo.isRest involved
@@ -89,7 +124,7 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
       match involved |> List.tryFind (ArgInfo.named name) with
       | Some info ->
         // TODO: parse value
-        failwith "not implemented"
+        parse info t acc restAcc
       | None when conf.allowUnknown ->
         run' t acc (h :: restAcc)
       | None ->
@@ -106,7 +141,7 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
         match involved |> List.tryFind (ArgInfo.short short) with
         | Some info ->
           // TODO: Parse value
-          failwith "not implemented"
+          parse info t acc restAcc
         | None when conf.allowUnknown ->
           run' t acc (h :: restAcc)
         | None ->
@@ -120,13 +155,28 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
         | None ->
           Error (sprintf "Unknown argument %s" h, "")
     | h :: t -> run' t acc (h :: restAcc)
-    
+  
+  and parse info args acc restAcc =
+    match ArgInfo.parseValue conf.parsers conf.culture args info with
+    | Success (args, value) -> run' args (value :: acc) restAcc
+    | Error (error, _) -> Error (error, "")
+    | Help _ -> failwith "Should not happen"
   
   let result = run' args [] []
   match result with
   | Success (args, rest) ->
-    // TODO: Implement
-    failwith "not implemented"
+    let restArg, error =
+      match rest, restArg with
+      | [], None -> None, None
+      | rest, Some restArg ->
+        Some (ArgInfo.restValue rest restArg), None
+      | rest, None -> None, Some (Error (sprintf "Unknown argument %s" (List.head rest), ""))
+
+    match error with
+    | Some error -> error
+    | None ->
+      let result = makeResult typeof<'a> (args @ ([restArg] |> List.choose id)) commands :?> 'a list
+      Success result
   | Error (error, help) -> Error (error, help)
   | Help h -> Help h
 

@@ -89,12 +89,14 @@ and [<NoComparison>] Rest = private {
 and [<NoComparison>] Commands = private {
   mandatory: bool
   commands: Command list
-  value: obj list -> obj }
+  value: obj list -> Command -> obj }
 
 and Command = private {
   name: string
   usage: string
-  children: T list }
+  children: T list
+  argType: Type
+  ctor: obj -> obj }
 
 let help = Flag {
   name = "help"
@@ -125,15 +127,46 @@ let short short = function
   | _ -> false
 
 let getCommand name = function
-  | Commands c ->
-    c.commands |> List.tryFind (fun c -> c.name = name)
+  | Commands c as arg ->
+    match c.commands |> List.tryFind (fun c -> c.name = name) with
+    | None -> None
+    | Some co -> Some (arg, co)
   | _ -> None
 
 let flagValue = function
   | Flag f -> f.value
   | _ -> failwith "Not a flag"
 
+let restValue values = function
+  | Rest r -> r.value values
+  | _ -> failwith "Not a rest argument"
+
+let commandValue values command = function
+  | Commands c -> c.value values command
+  | _ -> failwith "Not a command argument"
+
+let commandType ((arg: T), (command: Command)) = 
+  command.argType
+
+let parseArgument (getParser: Type -> ArgParser option) culture args info =
+  match getParser info.item with
+  | Some parser ->
+    match parser culture args with
+    | Some (value, args) -> Success (args, info.value value)
+    | None -> Error (sprintf "Could not parse %s as type %s" (List.head args) info.item.Name, "")
+  | None -> Error (sprintf "No parser found for type %s" info.item.Name, "")
+
+let parseValue getParser culture args = function
+  | Flag f -> Success (args, f.value)
+  | Argument a -> parseArgument getParser culture args a
+  | _ -> failwith "Only applicable to flags and arguments"
+
 let children command = command.children
+
+let createCommandValue ctor (values: obj list) (command: Command) =
+  let list = values |> List.dynamicCast command.argType
+  let value = command.ctor list
+  ctor [| value |]
 
 let rec create (case: UnionCaseInfo) =
   let fields = case.GetFields () |> List.ofArray
@@ -165,12 +198,14 @@ let rec create (case: UnionCaseInfo) =
         
         { name = name
           usage = usage
-          children = FSharpType.GetUnionCases (argsType, true) |> List.ofArray |> List.map create })
+          children = FSharpType.GetUnionCases (argsType, true) |> List.ofArray |> List.map create
+          argType = argsType
+          ctor = fun v -> ctor [| v |] })
 
     Commands {
       mandatory = mandatory
       commands = commands
-      value = (fun vals -> caseCtor [| vals :> obj |])
+      value = createCommandValue caseCtor
     }
 
   | false, true ->
