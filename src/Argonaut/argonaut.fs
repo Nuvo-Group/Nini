@@ -14,10 +14,14 @@ type OptionsConfig<'Template when 'Template :> IArgumentTemplate> = private {
 
 module internal Internal =
   let makeResult t arguments commands =
-    debug ()
     let grouped =
       arguments
-      |> List.groupBy (fun i -> (i.GetType ()).BaseType)
+      |> List.groupBy (fun i -> 
+        let t = i.GetType ()
+        match t.BaseType with
+        | null -> t
+        | b when b = typeof<obj> -> t
+        | b -> b)
       |> dict
 
     let bundled =
@@ -64,10 +68,12 @@ let create<'Template when 'Template :> IArgumentTemplate> =
 
   let argInfo = ArgInfo.help :: argInfo
 
-  { culture = culture
-    parsers = parsers
-    argInfo = argInfo
-    allowUnknown = false }
+  let result: OptionsConfig<'Template> =
+    { culture = culture
+      parsers = parsers
+      argInfo = argInfo
+      allowUnknown = false }
+  result
 
 let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
   let args = args |> List.ofArray

@@ -1,5 +1,7 @@
 ﻿[<AutoOpen>]
-module Argonaut.Utils
+module internal Argonaut.Utils
+
+open System
 
 open FSharp.Reflection
 
@@ -25,3 +27,19 @@ module List =
 
     fun list ->
       list |> List.fold (fun list item -> cons [| item; list |]) empty
+
+let private colorprint (fc, bc) (s: string) =
+  let foreground, background = Console.ForegroundColor, Console.BackgroundColor
+  try
+    Console.ForegroundColor <- fc
+    Console.BackgroundColor <- bc
+    Console.Write s
+  finally
+    Console.ForegroundColor <- foreground
+    Console.BackgroundColor <- background
+
+let cprintf c fmt =
+  Printf.kprintf (colorprint c) fmt
+
+let cprintfn c fmt =
+  Printf.kprintf ((fun s -> sprintf "%s%s" s Environment.NewLine) >> colorprint c) fmt
