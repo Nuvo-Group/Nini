@@ -49,6 +49,35 @@ module internal Internal =
 
     List.dynamicCast t result
 
+  let isCommand (case: UnionCaseInfo) =
+    let attrs = case.GetCustomAttributes (typeof<CommandAttribute>)
+    match Array.length attrs with
+    | 0 -> false
+    | 1 -> true
+    | _ -> failwith "Invalid number of command attributes"
+
+  let getCommandValue<'a, 'command> =
+    let t = typeof<'a>
+    let isUnion = FSharpType.IsUnion t
+    if not isUnion then invalidArg t.Name "Type is not a F# discriminated union"
+
+    let commandCase =
+      FSharpType.GetUnionCases (t, true)
+      |> Array.tryFind isCommand
+
+    match commandCase with
+    | None -> failwithf "Type %s does not have any command options" t.Name
+    | Some info ->
+      let valueField = Array.exactlyOne (info.GetFields ())
+      let tagField = FSharpValue.PreComputeUnionTagReader (t, true)
+
+      fun (obj: 'a) ->
+        if tagField obj = info.Tag then
+          Some (valueField.GetValue obj :?> 'command)
+        else
+          None
+
+
 open Internal
 
 let create<'Template when 'Template :> IArgumentTemplate> =
@@ -75,7 +104,7 @@ let create<'Template when 'Template :> IArgumentTemplate> =
       allowUnknown = false }
   result
 
-let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
+let parse (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
   let args = args |> List.ofArray
 
   let rec resolveCommands args commands involved current =
@@ -186,5 +215,35 @@ let run (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
   | Error (error, help) -> Error (error, help)
   | Help h -> Help h
 
-let parse<'Template, 'Result when 'Template :> IArgumentTemplate> (fold: 'Result -> 'Template -> 'Result) (initial: 'Result): Result<'Result> =
-  failwith "not implemented"
+let runResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'b) (args: Result<'a list>) =
+  match args with
+  | Error (error, help) -> failwith "TODO: Implement showing errors"
+  | Help h -> failwith "TODO: Implement showing help"
+  | Success list ->
+    let state = List.fold folder initialState list
+    run state
+
+let runCommandResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'command option -> 'b) (args: Result<'a list>) =
+  let getCommandValue = getCommandValue<'a, 'command>
+  let folder (state, command) value =
+    match getCommandValue value with
+    | Some command -> (state, Some command)
+    | None -> (folder state value, command)
+  let run (state, command) = run state command
+  let initialState: 'state * 'command option = (initialState, None)
+  
+  runResult folder initialState run args
+
+let runContext context folder initialState run args =
+  parse context args
+  |> runResult folder initialState run
+
+let runCommandContext context folder initialState run args =
+  parse context args
+  |> runCommandResult folder initialState run
+
+let run folder initialState run args =
+  runContext create<'a> folder initialState run args
+
+let runCommand folder initialState run args =
+  runCommandContext create<'a> folder initialState run args

@@ -47,7 +47,23 @@ type Case1Arguments =
   interface IArgumentTemplate with
     member x.Usage = ""
 
+type Case1Options = {
+  arg1: bool
+  arg2: bool
+  str: string option }
+
 let case1Context = OptionsParser.create<Case1Arguments>
+let parse1 = OptionsParser.parse case1Context
+let run1 folder state handler = OptionsParser.run case1Context folder state handler
+let defaultOptions1 = { arg1 = false; arg2 = false; str = None }
+let handleArg1 options = function
+  | TestArg1 -> { options with arg1 = true }
+  | TestArg2 -> { options with arg2 = true }
+  | StringArg s -> { options with str = Some s }
+
+let validateOptions1 ret (expected: 'a) (actual: 'a) =
+  Assert.Equal<'a> (expected, actual)
+  ret
 
 [<Fact>]
 let ``handles combination of flag shortnames`` () =
@@ -55,7 +71,7 @@ let ``handles combination of flag shortnames`` () =
   let args = [| "-ttet" |]
 
   // act
-  let result = OptionsParser.run case1Context args
+  let result = parse1 args
 
   // assert
   assertSuccess (checkArgs [TestArg1; TestArg1; TestArg2; TestArg1]) result
@@ -66,7 +82,7 @@ let ``handles full name flags`` () =
   let args = [| "--test-arg1"; "--test-arg2" |]
 
   // act
-  let result = OptionsParser.run case1Context args
+  let result = parse1 args
 
   // assert
   assertSuccess (checkArgs [TestArg1; TestArg2]) result
@@ -77,7 +93,22 @@ let ``handles string arguments`` () =
   let args = [| "--string-arg"; "value1"; "-s"; "value2" |]
 
   // act
-  let result = OptionsParser.run case1Context args
+  let result = parse1 args
 
   // assert
   assertSuccess (checkArgs [StringArg "value1"; StringArg "value2"]) result
+
+[<Fact>]
+let ``runs properly`` () =
+  // arrange
+  let args1 = [| "-t"; "-s"; "some value" |]
+  let args2 = [| "-e" |]
+
+  let test expectedOptions args =
+    let ret = obj ()
+    let result = run1 handleArg1 defaultOptions1 (validateOptions1 ret expectedOptions) args
+    Assert.Same (ret, result)
+
+  // act & assert
+  test { defaultOptions1 with arg1 = true; str = Some "some value" } args1
+  test { defaultOptions1 with arg2 = true } args2
