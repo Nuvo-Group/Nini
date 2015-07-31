@@ -215,15 +215,11 @@ let parse (conf: OptionsConfig<'a>) (args: string array): Result<'a list> =
   | Error (error, help) -> Error (error, help)
   | Help h -> Help h
 
-let runResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'b) (args: Result<'a list>) =
-  match args with
-  | Error (error, help) -> failwith "TODO: Implement showing errors"
-  | Help h -> failwith "TODO: Implement showing help"
-  | Success list ->
-    let state = List.fold folder initialState list
-    run state
+let runList (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'b) (args: 'a list) =
+  let state = List.fold folder initialState args
+  run state
 
-let runCommandResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'command option -> 'b) (args: Result<'a list>) =
+let runCommandList (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'command option -> 'b) (args: 'a list) =
   let getCommandValue = getCommandValue<'a, 'command>
   let folder (state, command) value =
     match getCommandValue value with
@@ -232,7 +228,18 @@ let runCommandResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (ru
   let run (state, command) = run state command
   let initialState: 'state * 'command option = (initialState, None)
   
-  runResult folder initialState run args
+  runList folder initialState run args
+
+let private runThen cont = function
+  | Error (error, help) -> failwith "TODO: Implement showing errors"
+  | Help h -> failwith "TODO: Implement showing help"
+  | Success list -> cont list
+
+let runResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'b) (args: Result<'a list>) =
+  runThen (fun list -> runList folder initialState run list) args
+
+let runCommandResult (folder: 'state -> 'a -> 'state) (initialState: 'state) (run: 'state -> 'command option -> 'b) (args: Result<'a list>) =
+  runThen (fun list -> runCommandList folder initialState run list) args
 
 let runContext context folder initialState run args =
   parse context args

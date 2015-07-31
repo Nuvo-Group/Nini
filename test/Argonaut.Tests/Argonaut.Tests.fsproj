@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="basic.fs" />
+    <Compile Include="program.fs" />
     <None Include="project.fsharp.json" />
     <None Include="project.json" />
   </ItemGroup>

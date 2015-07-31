@@ -1,5 +1,6 @@
 {
   "files": [
-    "basic.fs"
+    "basic.fs",
+    "program.fs"
   ]
 }
