@@ -54,7 +54,7 @@ type Case1Options = {
 
 let case1Context = OptionsParser.create<Case1Arguments>
 let parse1 = OptionsParser.parse case1Context
-let run1 folder state handler = OptionsParser.run case1Context folder state handler
+let run1 folder state handler = OptionsParser.runContext case1Context folder state handler
 let defaultOptions1 = { arg1 = false; arg2 = false; str = None }
 let handleArg1 options = function
   | TestArg1 -> { options with arg1 = true }
